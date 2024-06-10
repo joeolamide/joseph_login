@@ -62,6 +62,102 @@ class AuthService {
   }
 
  
+// Future<bool> login(String email, String password, BuildContext context) async {
+//   final response = await http.post(
+//     Uri.parse(_loginUrl),
+//     headers: {'Content-Type': 'application/json'},
+//     body: jsonEncode({'email': email, 'password': password}),
+//   );
+
+//   if (response.statusCode == 200) {
+//     final responseData = jsonDecode(response.body);
+//     final token = responseData['token'];
+//     final prefs = await SharedPreferences.getInstance();
+//     await prefs.setString('token', token); // Use setString since token is a String
+
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         title: Text('Success'),
+//         content: Text('Login successful'),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pushReplacement(
+//               context,
+//               MaterialPageRoute(builder: (context) => SuccessScreen()),
+//             ),
+//             child: Text('OK'),
+//           ),
+//         ],
+//       ),
+//     );
+//     return true;
+//   } else {
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         title: Text('Error'),
+//         content: Text('Login failed'),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.of(context).pop(),
+//             child: Text('OK'),
+//           ),
+//         ],
+//       ),
+//     );
+//     return false;
+//   }
+// }
+
+// Future<bool> login(String email, String password, BuildContext context) async {
+//   final response = await http.post(
+//     Uri.parse(_loginUrl),
+//     headers: {'Content-Type': 'application/json'},
+//     body: jsonEncode({'email': email, 'password': password}),
+//   );
+
+//   if (response.statusCode == 200) {
+//     final responseData = jsonDecode(response.body);
+//     final token = responseData['access_token']; 
+//     final prefs = await SharedPreferences.getInstance();
+//     await prefs.setString('token', token);
+
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         title: Text('Success'),
+//         content: Text('Login successful'),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pushReplacement(
+//               context,
+//               MaterialPageRoute(builder: (context) => SuccessScreen()),
+//             ),
+//             child: Text('OK'),
+//           ),
+//         ],
+//       ),
+//     );
+//     return true;
+//   } else {
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         title: Text('Error'),
+//         content: Text('Login failed'),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.of(context).pop(),
+//             child: Text('OK'),
+//           ),
+//         ],
+//       ),
+//     );
+//     return false;
+//   }
+// }
+
 Future<bool> login(String email, String password, BuildContext context) async {
   final response = await http.post(
     Uri.parse(_loginUrl),
@@ -71,27 +167,50 @@ Future<bool> login(String email, String password, BuildContext context) async {
 
   if (response.statusCode == 200) {
     final responseData = jsonDecode(response.body);
-    final token = responseData['token'];
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token); // Use setString since token is a String
+   // print(responseData); // Print the entire response data
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Success'),
-        content: Text('Login successful'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => SuccessScreen()),
+    // Check if the `access_token` key exists in the response
+    if (responseData.containsKey('access_token')) {
+      final token = responseData['access_token'];
+      print('Access Token: $token'); // Print the access token
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Success'),
+          content: Text('Login successful'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SuccessScreen()),
+              ),
+              child: Text('OK'),
             ),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-    return true;
+          ],
+        ),
+      );
+      return true;
+    } else {
+      // Handle the case where the `access_token` key is not present
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Access token not found in the response'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
   } else {
     showDialog(
       context: context,
